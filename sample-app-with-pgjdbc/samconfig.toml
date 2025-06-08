@@ -1,9 +1,0 @@
-version = 0.1
-[default.deploy.parameters]
-stack_name = "AWSLambdaJava21WithAuroraDSQLAndPgJDBC"
-resolve_s3 = true
-s3_prefix = "AWSLambdaJava21WithAuroraDSQLAndPgJDBC"
-region = "us-east-1"
-capabilities = "CAPABILITY_IAM"
-parameter_overrides = "Stage=\"orders\" DSQLClusterId=\"omabueisybk3funxgzumcauesq.dsql.us-east-1.on.aws\""
-image_repositories = []
