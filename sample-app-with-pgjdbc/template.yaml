@@ -9,7 +9,7 @@ Parameters:
     Type: String
     Default: orders
     
-  DSQLClusterId:
+  AuroraDSQLClusterId:
     Description: "Aurora DSQL Cluster ID"
     Type: String
     
@@ -28,7 +28,7 @@ Globals:
     Environment:
       Variables:
         JAVA_TOOL_OPTIONS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
-        AURORA_DSQL_CLUSTER_ENDPOINT: !Ref DSQLClusterId
+        AURORA_DSQL_CLUSTER_ENDPOINT: !Sub ${AuroraDSQLClusterId}.dsql.${AWS::Region}.on.aws
         REGION: !Sub ${AWS::Region}
 
 Resources:
@@ -109,7 +109,8 @@ Resources:
             - Effect: Allow
               Action:
                 - dsql:DbConnectAdmin
-              Resource: "*"
+              Resource: !Sub arn:aws:dsql:${AWS::Region}:${AWS::AccountId}:cluster/${AuroraDSQLClusterId}
+              
       Events:
         GetRequestById:
           Type: Api
