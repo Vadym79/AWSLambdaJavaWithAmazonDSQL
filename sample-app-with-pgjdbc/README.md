@@ -1,0 +1,50 @@
+# Example of Lambda using Amazon Aurora DSQL with AWS SDK, PgJDBC and Hikari datasource pool 
+
+## Architecture
+
+
+
+## Installation and deployment
+
+Unfortunately it's currently not possible to create DSQL cluster with AWS SAM, so please
+use AWS CLI for it, see the description https://docs.aws.amazon.com/aurora-dsql/latest/userguide/getting-started.html
+I created a single-region DSQL cluster with: aws dsql create-cluster --region us-east-1 
+
+
+```bash
+
+Clone git repository locally
+git clone https://github.com/Vadym79/AWSLambdaJavaWithAmazonDSQL.git
+
+
+Compile and package the Java application with Maven from the root (where pom.xml is located) of the project
+mvn clean package
+
+Deploy your application with AWS SAM
+sam deploy -g --region us-east-1
+
+please provide your Aurora DSQL cluster endpoint as an input for the variable DSQLClusterId
+```
+Now you API Gateway has been deployed and you have some REST endpoint like /orders/{id}
+
+## In oder to use it you're required to
+
+1) Connect to the already created Aurora DSQL cluster using CloudShell, see the desciption here https://docs.aws.amazon.com/aurora-dsql/latest/userguide/getting-started.html#connect-dsql-cluster
+2) Execute these sql statements to create table and sequences   
+
+CREATE TABLE orders (id int  NOT NULL UNIQUE,  user_id  int NOT NULL, total_value int NOT NULL ); 
+
+CREATE TABLE order_items (id int  NOT NULL UNIQUE,  product_id int NOT NULL, order_id int NOT NULL, value int NOT NULL, quantity int NOT NULL);
+
+3) Populate some data
+
+INSERT INTO orders VALUES (1, 12345, 250); 
+
+INSERT INTO order_items VALUES (1, 79900, 1, 150, 1); 
+INSERT INTO order_items VALUES (2, 79901, 1, 100, 2); 
+
+
+INSERT INTO orders VALUES (2, 24678, 200); 
+
+INSERT INTO order_items VALUES (3, 79900, 2, 50, 1); 
+INSERT INTO order_items VALUES (4, 79902, 2, 150, 3); 
