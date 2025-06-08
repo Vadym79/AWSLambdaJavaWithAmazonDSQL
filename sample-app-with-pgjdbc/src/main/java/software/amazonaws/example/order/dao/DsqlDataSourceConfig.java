@@ -34,6 +34,8 @@ public class DsqlDataSourceConfig {
 		final HikariConfig config = new HikariConfig();
 		config.setUsername("admin");
 		config.setJdbcUrl(JDBC_URL);
+		config.setMaxLifetime(1500 * 1000); // pool connection expiration time in milli seconds, default 30
+		config.setMaximumPoolSize(5); // default is 10
 
 		String authToken = getAuthToken();
 
@@ -42,6 +44,7 @@ public class DsqlDataSourceConfig {
 
 		// Set additional properties
 		hds.setMaxLifetime(1500 * 1000); // pool connection expiration time in milli seconds
+	
 
 		System.out.println("before creating authToken");
 	}

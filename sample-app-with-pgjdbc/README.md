@@ -25,7 +25,7 @@ sam deploy -g --region us-east-1
 
 Please provide your Aurora DSQL cluster id (not the endpoint!) as an input for the variable AuroraDSQLClusterId like jkliueisyb4ghfunxgzgjklll
 ```
-Now you API Gateway has been deployed and you have some REST endpoint like /orders/{id}
+Now you API Gateway has been deployed and you have some REST endpoint like /orders/{id} , /orderitems/{id}
 
 ## In oder to use it you're required to
 
