@@ -11,6 +11,13 @@ import software.amazonaws.example.order.entity.OrderItem;
 
 public class OrderDao {
 
+	/**
+	 * returns order by its id without order items
+	 * 
+	 * @param id -order id
+	 * @return
+	 * @throws Exception
+	 */
 	public Optional<Order> getOrderById(int id) throws Exception {
 		try (Connection con = DsqlDataSourceConfig.getPooledConnection();
 				PreparedStatement pst = this.createGetOrderByIdPreparedStatement(con, id);
@@ -27,6 +34,12 @@ public class OrderDao {
 		}
 	}
 	
+	/**returns order item by its id
+	 * 
+	 * @param id - order item id
+	 * @return
+	 * @throws Exception
+	 */
 	public Optional <OrderItem> getOrderItemById (int id) throws Exception {
 		try (Connection con = DsqlDataSourceConfig.getPooledConnection();
 				PreparedStatement pst = this.createGetOrderItemByIdPreparedStatement(con, id);

@@ -37,16 +37,10 @@ public class DsqlDataSourceConfig {
 		config.setMaxLifetime(1500 * 1000); // pool connection expiration time in milli seconds, default 30
 		config.setMaximumPoolSize(5); // default is 10
 
-		String authToken = getAuthToken();
+		String authToken = getAuthTokenForAdminUser();
 
 		config.setPassword(authToken);
 		hds = new HikariDataSource(config);
-
-		// Set additional properties
-		hds.setMaxLifetime(1500 * 1000); // pool connection expiration time in milli seconds
-	
-
-		System.out.println("before creating authToken");
 	}
 
 	/**
@@ -57,7 +51,7 @@ public class DsqlDataSourceConfig {
 	 */
 	public static Connection getPooledConnection() throws SQLException {
 		// Use generateDbConnectAuthToken when connecting as `admin` user
-		String authToken = getAuthToken();
+		String authToken = getAuthTokenForAdminUser();
 		hds.setPassword(authToken);
 		return hds.getConnection();
 	}
@@ -66,7 +60,7 @@ public class DsqlDataSourceConfig {
 	public static Connection getJDBCConnection() throws SQLException {
 		Properties props = new Properties();
 		props.setProperty("user", "admin");
-		String authToken = getAuthToken();
+		String authToken = getAuthTokenForAdminUser();
 		props.setProperty("password", authToken);
 		return DriverManager.getConnection(JDBC_URL, props);
 	}
@@ -76,7 +70,7 @@ public class DsqlDataSourceConfig {
 	 * 
 	 * @return auth token
 	 */
-	private static String getAuthToken() {
+	private static String getAuthTokenForAdminUser() {
 		String authToken= utilities.generateDbConnectAdminAuthToken(builder -> builder.hostname(AURORA_DSQL_CLUSTER_ENDPOINT)
 				.region(Region.of(REGION.toLowerCase())).expiresIn(Duration.ofMillis(900 * 1000))); // Token expiration, default is 900 seconds
 		//System.out.println("authToken : " + authToken);
