@@ -1,4 +1,4 @@
-# Example of Lambda using Amazon Aurora DSQL with AWS SDK, PgJDBC and Hikari datasource pool 
+# Example of Lambda with managed Java 21 runtime using Amazon Aurora DSQL with PgJDBC and Hikari datasource pool 
 
 ## Architecture
 
@@ -6,9 +6,9 @@
 
 ## Installation and deployment
 
-Unfortunately it's currently not possible to create DSQL cluster with AWS SAM, so please
-use AWS CLI for it, see the description https://docs.aws.amazon.com/aurora-dsql/latest/userguide/getting-started.html
-I created a single-region DSQL cluster with: aws dsql create-cluster --region us-east-1 
+Unfortunately it's currently not possible to create DSQL cluster with AWS SAM, so please use AWS CLI for it.  
+See the description https://docs.aws.amazon.com/aurora-dsql/latest/userguide/getting-started.html  
+I created a single-region DSQL cluster with: aws dsql create-cluster --region us-east-1  
 
 
 ```bash
@@ -23,7 +23,7 @@ mvn clean package
 Deploy your application with AWS SAM
 sam deploy -g --region us-east-1
 
-please provide your Aurora DSQL cluster endpoint as an input for the variable DSQLClusterId
+Please provide your Aurora DSQL cluster endpoint as an input for the variable DSQLClusterId
 ```
 Now you API Gateway has been deployed and you have some REST endpoint like /orders/{id}
 
