@@ -97,6 +97,35 @@ Resources:
         UsagePlanId: !Ref MyApiUsagePlan
 
 
+  CreateOrderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: CreateOrderWithJava21Lambda
+      AutoPublishAlias: liveVersion
+      Handler: software.amazonaws.example.order.handler.CreateOrderHandler::handleRequest
+      Policies:
+        - Version: '2012-10-17' # Policy Document
+          Statement:
+            - Effect: Allow
+              Action:
+                - dsql:DbConnectAdmin
+              Resource: !Sub arn:aws:dsql:${AWS::Region}:${AWS::AccountId}:cluster/${AuroraDSQLClusterId}
+              
+      Events:
+        GetRequestById:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyApi
+            Path: /orders
+            Method: put    
+
+  CreateOrderFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${CreateOrderFunction}"
+      RetentionInDays: 7
+
+
   GetOrderByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -126,35 +155,6 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${GetOrderByIdFunction}"
       RetentionInDays: 7
 
-
-  GetOrderItemByIdFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: GetOrderItemByIdWithJava21Lambda
-      AutoPublishAlias: liveVersion
-      Handler: software.amazonaws.example.order.handler.GetOrderItemByIdHandler::handleRequest
-      Policies:
-        - Version: '2012-10-17' # Policy Document
-          Statement:
-            - Effect: Allow
-              Action:
-                - dsql:DbConnectAdmin
-              Resource: !Sub arn:aws:dsql:${AWS::Region}:${AWS::AccountId}:cluster/${AuroraDSQLClusterId}
-              
-      Events:
-        GetRequestById:
-          Type: Api
-          Properties:
-            RestApiId: !Ref MyApi
-            Path: /orderitems/{id}
-            Method: get     
-            
-            
-  GetOrderItemByIdFunctionLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${GetOrderItemByIdFunction}"
-      RetentionInDays: 7
 
 Outputs:
   AWSLambdaJava21WithDSQLAndPgJDBCAPIEndpoint:

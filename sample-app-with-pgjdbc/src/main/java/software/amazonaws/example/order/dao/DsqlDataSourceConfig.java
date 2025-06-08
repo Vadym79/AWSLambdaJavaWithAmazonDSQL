@@ -44,9 +44,9 @@ public class DsqlDataSourceConfig {
 	}
 
 	/**
-	 * creates jdbc connection
+	 * creates jdbc connection backed by Hikari data source pool
 	 * 
-	 * @return jdbc connection
+	 * @return jdbc connection backed by Hikari data source pool
 	 * @throws SQLException
 	 */
 	public static Connection getPooledConnection() throws SQLException {
@@ -57,6 +57,11 @@ public class DsqlDataSourceConfig {
 	}
 	
 
+	/** creates a new jdbc connection
+	 * 
+	 * @return new jdbc connection 
+	 * @throws SQLException
+	 */
 	public static Connection getJDBCConnection() throws SQLException {
 		Properties props = new Properties();
 		props.setProperty("user", "admin");

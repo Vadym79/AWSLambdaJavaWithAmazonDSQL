@@ -4,7 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import software.amazonaws.example.order.entity.Order;
 import software.amazonaws.example.order.entity.OrderItem;
@@ -12,7 +14,41 @@ import software.amazonaws.example.order.entity.OrderItem;
 public class OrderDao {
 
 	/**
-	 * returns order by its id without order items
+	 * create order and return its id
+	 * 
+	 * @param order order
+	 * @return order id
+	 */
+	public int createOrder(Order order) throws Exception {
+		int randomOrderId = (int) (Math.random() * 10000001);
+		order.setId(randomOrderId);
+		try (Connection con = DsqlDataSourceConfig.getPooledConnection()) {
+			con.setAutoCommit(false);
+
+			try (PreparedStatement pst = this.createOrderPreparedStatement(con, order)) {
+				pst.executeUpdate();
+
+				for (OrderItem orderItem : order.getOrderItems()) {
+					int randomOrderItemId = (int) (Math.random() * 100000001);
+					orderItem.setId(randomOrderItemId);
+					orderItem.setOrderId(randomOrderId);
+					try (PreparedStatement psti = this.createOrderItemPreparedStatement(con, orderItem)) {
+						psti.executeUpdate();
+					}
+				}
+				con.commit();
+			} catch (SQLException ex) {
+				con.rollback();
+				throw ex;
+			} finally {
+				con.setAutoCommit(true);
+			}
+		}
+		return randomOrderId;
+	}
+
+	/**
+	 * returns order by its id with order items
 	 * 
 	 * @param id -order id
 	 * @return
@@ -20,59 +56,73 @@ public class OrderDao {
 	 */
 	public Optional<Order> getOrderById(int id) throws Exception {
 		try (Connection con = DsqlDataSourceConfig.getPooledConnection();
-				PreparedStatement pst = this.createGetOrderByIdPreparedStatement(con, id);
+				PreparedStatement pst = this.getOrderByIdPreparedStatement(con, id);
 				ResultSet rs = pst.executeQuery()) {
 			if (rs.next()) {
 
 				int userId = rs.getInt("user_id");
 				int totalValue = rs.getInt("total_value");
-				Order order = new Order(id, userId, totalValue);
+				final Order order = new Order();
+				order.setId(id);
+				order.setUserId(userId);
+				order.setTotalValue(totalValue);
+
+				Set<OrderItem> orderItems = new HashSet<>();
+
+				try (PreparedStatement psti = this.getOrderItemsByOrderIdPreparedStatement(con, id);
+						ResultSet rsi = psti.executeQuery()) {
+					while (rsi.next()) {
+						int itemId = rsi.getInt("id");
+						int productId = rsi.getInt("product_id");
+						int value = rsi.getInt("value");
+						int quantity = rsi.getInt("quantity");
+
+						final OrderItem orderItem = new OrderItem();
+						orderItem.setId(itemId);
+						orderItem.setProductId(productId);
+						orderItem.setOrderId(id);
+						orderItem.setQuantity(quantity);
+						orderItem.setValue(value);
+						orderItems.add(orderItem);
+					}
+				}
+				order.setOrderItems(orderItems);
 				return Optional.of(order);
 			} else {
 				return Optional.empty();
 			}
 		}
 	}
-	
-	/**returns order item by its id
-	 * 
-	 * @param id - order item id
-	 * @return
-	 * @throws Exception
-	 */
-	public Optional <OrderItem> getOrderItemById (int id) throws Exception {
-		try (Connection con = DsqlDataSourceConfig.getPooledConnection();
-				PreparedStatement pst = this.createGetOrderItemByIdPreparedStatement(con, id);
-				ResultSet rs = pst.executeQuery()) {
-			if (rs.next()) {
 
-				int userId = rs.getInt("user_id");
-				int totalValue = rs.getInt("total_value");
-				int orderId = rs.getInt("order_id");
-				final Order order = new Order(orderId, userId, totalValue);
-				
-				int orderItemId=rs.getInt("order_item_id");
-				int productId=rs.getInt("product_id");
-				int value=rs.getInt("value");
-				int quantity=rs.getInt("quantity");
-				final OrderItem orderItem = new OrderItem(orderItemId, productId, order, value, quantity);
-				return Optional.of(orderItem);
-			} else {
-				return Optional.empty();
-			}
-		}
-		
+
+	private PreparedStatement createOrderPreparedStatement(Connection con, Order order) throws SQLException {
+		PreparedStatement pst = con.prepareStatement("INSERT INTO orders VALUES (?, ?, ?) ");
+		pst.setInt(1, order.getId());
+		pst.setInt(2, order.getUserId());
+		pst.setInt(3, order.getTotalValue());
+		return pst;
 	}
 
-	private PreparedStatement createGetOrderByIdPreparedStatement(Connection con, int id) throws SQLException {
+	private PreparedStatement createOrderItemPreparedStatement(Connection con, OrderItem orderItem)
+			throws SQLException {
+		PreparedStatement pst = con.prepareStatement("INSERT INTO order_items VALUES (?, ?, ?, ?, ?)");
+		pst.setInt(1, orderItem.getId());
+		pst.setInt(2, orderItem.getProductId());
+		pst.setInt(3, orderItem.getOrderId());
+		pst.setInt(4, orderItem.getValue());
+		pst.setInt(5, orderItem.getQuantity());
+		return pst;
+	}
+
+	private PreparedStatement getOrderByIdPreparedStatement(Connection con, int id) throws SQLException {
 		PreparedStatement pst = con.prepareStatement("SELECT * FROM orders WHERE id = ?");
 		pst.setInt(1, id);
 		return pst;
 	}
-	
-	private PreparedStatement createGetOrderItemByIdPreparedStatement(Connection con, int id) throws SQLException {
-		PreparedStatement pst = con.prepareStatement("SELECT o.user_id, o.total_value, oi.id as order_item_id, oi.product_id, oi.order_id, oi.value, oi.quantity FROM order_items as oi JOIN orders as o ON o.id = oi.order_id WHERE oi.id = ? ");
-		pst.setInt(1, id);
+
+	private PreparedStatement getOrderItemsByOrderIdPreparedStatement(Connection con, int orderId) throws SQLException {
+		PreparedStatement pst = con.prepareStatement("SELECT * FROM order_items WHERE order_id = ?");
+		pst.setInt(1, orderId);
 		return pst;
 	}
 }
