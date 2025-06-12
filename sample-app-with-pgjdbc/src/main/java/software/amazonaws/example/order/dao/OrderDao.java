@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import software.amazonaws.example.order.entity.Order;
+import software.amazonaws.example.order.entity.Order.Status;
 import software.amazonaws.example.order.entity.OrderItem;
 
 public class OrderDao {
@@ -22,6 +23,7 @@ public class OrderDao {
 	public int createOrder(Order order) throws Exception {
 		int randomOrderId = (int) (Math.random() * 10000001);
 		order.setId(randomOrderId);
+		order.setStatus(Status.RECEIVED.name());
 		try (Connection con = DsqlDataSourceConfig.getPooledConnection()) {
 			con.setAutoCommit(false);
 
@@ -46,6 +48,24 @@ public class OrderDao {
 		}
 		return randomOrderId;
 	}
+	
+	
+	/**
+	 * updates order status by order id
+	 * 
+	 * @param id - order id
+	 * @param status order status to set for order
+	 * @return order id
+	 */
+	public int updateOrderStatusByOrderId(int id, String status) throws Exception {
+		try (Connection con = DsqlDataSourceConfig.getPooledConnection()) {
+			try (PreparedStatement pst = this.updateOrderStatusByOrderIdPreparedStatement(con, id, status)) {
+				pst.executeUpdate();
+			}
+		}
+		return id;
+	}
+
 
 	/**
 	 * returns order by its id with order items
@@ -62,10 +82,12 @@ public class OrderDao {
 
 				int userId = rs.getInt("user_id");
 				int totalValue = rs.getInt("total_value");
+				String status = rs.getString("status");
 				final Order order = new Order();
 				order.setId(id);
 				order.setUserId(userId);
 				order.setTotalValue(totalValue);
+				order.setStatus(status);
 
 				Set<OrderItem> orderItems = new HashSet<>();
 
@@ -94,12 +116,22 @@ public class OrderDao {
 		}
 	}
 
+	
+	
+	private PreparedStatement updateOrderStatusByOrderIdPreparedStatement(Connection con, int id, String status) throws SQLException {
+		PreparedStatement pst = con.prepareStatement("UPDATE orders SET status=? WHERE id=?");
+		pst.setString(1, status);
+		pst.setInt(2, id);
+		return pst;
+	}
+
 
 	private PreparedStatement createOrderPreparedStatement(Connection con, Order order) throws SQLException {
-		PreparedStatement pst = con.prepareStatement("INSERT INTO orders VALUES (?, ?, ?) ");
+		PreparedStatement pst = con.prepareStatement("INSERT INTO orders VALUES (?, ?, ?, ?) ");
 		pst.setInt(1, order.getId());
 		pst.setInt(2, order.getUserId());
 		pst.setInt(3, order.getTotalValue());
+		pst.setString(4, order.getStatus());
 		return pst;
 	}
 

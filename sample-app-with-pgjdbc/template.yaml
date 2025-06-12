@@ -117,7 +117,7 @@ Resources:
           Properties:
             RestApiId: !Ref MyApi
             Path: /orders
-            Method: put    
+            Method: post    
 
   CreateOrderFunctionLogGroup:
     Type: AWS::Logs::LogGroup
@@ -153,6 +153,35 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub "/aws/lambda/${GetOrderByIdFunction}"
+      RetentionInDays: 7
+
+
+  UpdateOrderStatusByOrderIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: UpdateOrderStatusByOrderIdWithJava21Lambda
+      AutoPublishAlias: liveVersion
+      Handler: software.amazonaws.example.order.handler.UpdateOrderStatusByOrderIdHandler::handleRequest
+      Policies:
+        - Version: '2012-10-17' # Policy Document
+          Statement:
+            - Effect: Allow
+              Action:
+                - dsql:DbConnectAdmin
+              Resource: !Sub arn:aws:dsql:${AWS::Region}:${AWS::AccountId}:cluster/${AuroraDSQLClusterId}
+              
+      Events:
+        GetRequestById:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyApi
+            Path: /orders/updatestatus/{id}
+            Method: put    
+
+  UpdateOrderStatusByOrderIdFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${UpdateOrderStatusByOrderIdFunction}"
       RetentionInDays: 7
 
 

@@ -25,16 +25,30 @@ sam deploy -g --region us-east-1
 
 Please provide your Aurora DSQL cluster id (not the endpoint!) as an input for the variable AuroraDSQLClusterId like jkliueisyb4ghfunxgzgjklll
 ```
-Now you API Gateway has been deployed and you have some REST endpoint like /orders/{id} , /orderitems/{id}
+Now you API Gateway has been deployed and you have some REST endpoint like get for /orders/{id} and post for /orders and so on
+
+Use this Http Body as Json to create a sample order with 2 items :
+
+{"userId":12345,"totalValue":350,
+ "orderItems":[{"productId":230, "value":100,"quantity":3},{"productId":233, "value":250,"quantity":3}]
+} 
+
+for update order status use specific order use orders/updatestatus/{id} and status like SHIPPED as body
+
+
+  
 
 ## In oder to use it you're required to
 
-1) Connect to the already created Aurora DSQL cluster using CloudShell, see the desciption here https://docs.aws.amazon.com/aurora-dsql/latest/userguide/getting-started.html#connect-dsql-cluster
+1) Connect to the already created Aurora DSQL cluster using CloudShell, see the desciption here  
+ https://docs.aws.amazon.com/aurora-dsql/latest/userguide/getting-started.html#connect-dsql-cluster and here  
+ https://docs.aws.amazon.com/aurora-dsql/latest/userguide/getting-started.html#accessing-sql-clients-psql
+ 
 2) Execute these sql statements to create table and sequences   
 
-CREATE TABLE orders (id int  NOT NULL UNIQUE,  user_id  int NOT NULL, total_value int NOT NULL ); 
+CREATE TABLE orders (id int  NOT NULL PRIMARY KEY,  user_id  int NOT NULL, total_value int NOT NULL, status varchar (255) NOT NULL ); 
 
-CREATE TABLE order_items (id int  NOT NULL UNIQUE,  product_id int NOT NULL, order_id int NOT NULL, value int NOT NULL, quantity int NOT NULL);
+CREATE TABLE order_items (id int  NOT NULL PRIMARY KEY,  product_id int NOT NULL, order_id int NOT NULL, value int NOT NULL, quantity int NOT NULL);
 
 3) Populate some data
 

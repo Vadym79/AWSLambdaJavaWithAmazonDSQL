@@ -8,7 +8,14 @@ public class Order {
 	private int userId; 
 	private int totalValue;
 	private Set<OrderItem> orderItems=Set.of();
+	private String status ;
 	
+	public String getStatus() {
+		return this.status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
 	public int getId() {
 		return this.id;
 	}
@@ -38,9 +45,14 @@ public class Order {
 	@Override
 	public String toString() {
 		return "Order [id=" + this.id + ", userId=" + this.userId + ", totalValue=" + this.totalValue +
-				", orderItems=" + this.orderItems
+				", orderItems=" + this.orderItems+ ", status=" + this.status
 				+ "]";
 	}
 	
+	public enum Status {
+		  RECEIVED,
+		  SHIPPED
+		}
+
 	
 }
