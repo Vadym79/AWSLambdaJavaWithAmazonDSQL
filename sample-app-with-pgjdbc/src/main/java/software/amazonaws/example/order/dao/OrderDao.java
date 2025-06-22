@@ -84,7 +84,7 @@ public class OrderDao {
 				PreparedStatement pst = this.getOrderByIdPreparedStatement(con, id);
 				ResultSet rs = pst.executeQuery()) {
 			if (rs.next()) {
-
+				long startTime=System.currentTimeMillis();
 				int userId = rs.getInt("user_id");
 				int totalValue = rs.getInt("total_value");
 				String status = rs.getString("status");
@@ -114,6 +114,8 @@ public class OrderDao {
 					}
 				}
 				order.setOrderItems(orderItems);
+				long endTime=System.currentTimeMillis();
+				System.out.println("time to get an order by id " +id+ " in ms "+(endTime-startTime)); 
 				return Optional.of(order);
 			} else {
 				return Optional.empty();
