@@ -5,6 +5,9 @@ package software.amazonaws.example.order.handler;
 
 import java.util.Optional;
 
+import org.crac.Core;
+import org.crac.Resource;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
@@ -16,10 +19,14 @@ import software.amazonaws.example.order.dao.OrderDao;
 import software.amazonaws.example.order.entity.Order;
 
 public class GetOrderByIdHandler
-		implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+		implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent>, Resource {
 
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 	private static final OrderDao orderDao= new OrderDao();
+	
+	public GetOrderByIdHandler() {
+		Core.getGlobalContext().register(this);
+	}
 
 	@Override
 	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
@@ -41,5 +48,17 @@ public class GetOrderByIdHandler
 					.withBody("Internal Server Error :: " + je.getMessage());
 		}
 	}
+	
+	@Override
+	public void beforeCheckpoint(org.crac.Context<? extends Resource> context) throws Exception {
+		long startTime=System.currentTimeMillis();
+		orderDao.getOrderById(0);
+		long endTime=System.currentTimeMillis();
+		System.out.println("time to prime the order in ms "+(endTime-startTime));
+	}
+
+	@Override
+	public void afterRestore(org.crac.Context<? extends Resource> context) throws Exception {
+	}	
 
 }

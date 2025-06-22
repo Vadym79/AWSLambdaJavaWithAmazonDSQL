@@ -14,7 +14,7 @@ import software.amazonaws.example.order.entity.OrderItem;
 
 public class OrderDao {
 	
-	private DsqlDataSourceConfig config = new DsqlDataSourceConfig();
+	//private DsqlDataSourceConfig config = new DsqlDataSourceConfig();
 
 	/**
 	 * create order and return its id
