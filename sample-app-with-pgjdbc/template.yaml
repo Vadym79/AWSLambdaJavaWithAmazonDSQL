@@ -7,7 +7,7 @@ Description: >
 Parameters:
   Stage:
     Type: String
-    Default: orders
+    Default: prod
     
   AuroraDSQLClusterId:
     Description: "Aurora DSQL Cluster ID"
@@ -67,7 +67,7 @@ Resources:
       UsagePlanName: AWSLambdaJava21WithDSQLAndPgJDBCAPIUsagePlan
       Description: Usage plan for AWSLambdaJava21WithDSQLAndPgJDBCAPI
       Quota:
-          Limit: 500000
+          Limit: 2000000
           Period: DAY
       Throttle:
           RateLimit:  10000

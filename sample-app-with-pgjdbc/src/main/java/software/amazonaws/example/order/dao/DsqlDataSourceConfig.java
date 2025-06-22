@@ -39,7 +39,7 @@ public class DsqlDataSourceConfig {
 		config.setUsername("admin");
 		config.setJdbcUrl(JDBC_URL);
 		config.setMaxLifetime(1500 * 1000); // pool connection expiration time in milli seconds, default 30
-		config.setMaximumPoolSize(2); // default is 10
+		config.setMaximumPoolSize(5); // default is 10
 
 		String authToken = getAuthTokenForAdminUser();
 
@@ -50,6 +50,7 @@ public class DsqlDataSourceConfig {
 		 
 	}
 	
+	
 
 	/**
 	 * creates jdbc connection backed by Hikari data source pool
@@ -57,6 +58,7 @@ public class DsqlDataSourceConfig {
 	 * @return jdbc connection backed by Hikari data source pool
 	 * @throws SQLException
 	 */
+	
 	public static Connection getPooledConnection() throws SQLException {
 		// Use generateDbConnectAuthToken when connecting as `admin` user
 		long startTime=System.currentTimeMillis();
