@@ -14,7 +14,10 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dsql.DsqlUtilities;
 
 public class DsqlDataSourceConfig {
-
+	
+	private static Connection jdbConnection=null; 
+	static long startTime=System.currentTimeMillis();
+	 
 	private static final String REGION = System.getenv("REGION");
 	private static final DsqlUtilities utilities = DsqlUtilities.builder().region(Region.of(REGION.toLowerCase()))
 			.credentialsProvider(DefaultCredentialsProvider.create()).build();
@@ -25,6 +28,7 @@ public class DsqlDataSourceConfig {
 			+ AURORA_DSQL_CLUSTER_ENDPOINT
 			+ ":5432/postgres?sslmode=verify-full&sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory";
 
+	
 	private static HikariDataSource hds;
 	static {
 		
@@ -35,13 +39,17 @@ public class DsqlDataSourceConfig {
 		config.setUsername("admin");
 		config.setJdbcUrl(JDBC_URL);
 		config.setMaxLifetime(1500 * 1000); // pool connection expiration time in milli seconds, default 30
-		config.setMaximumPoolSize(5); // default is 10
+		config.setMaximumPoolSize(2); // default is 10
 
 		String authToken = getAuthTokenForAdminUser();
 
 		config.setPassword(authToken);
 		hds = new HikariDataSource(config);
+		long endTime=System.currentTimeMillis();
+		System.out.println("time to create hikari data source in ms "+(endTime-startTime));
+		 
 	}
+	
 
 	/**
 	 * creates jdbc connection backed by Hikari data source pool
@@ -51,9 +59,14 @@ public class DsqlDataSourceConfig {
 	 */
 	public static Connection getPooledConnection() throws SQLException {
 		// Use generateDbConnectAuthToken when connecting as `admin` user
+		long startTime=System.currentTimeMillis();
 		String authToken = getAuthTokenForAdminUser();
 		hds.setPassword(authToken);
-		return hds.getConnection();
+		Connection connection= hds.getConnection();
+		long endTime=System.currentTimeMillis();
+		System.out.println("time to create hikari pooled connection in ms "+(endTime-startTime)); 
+		return connection;
+		
 	}
 	
 
@@ -63,11 +76,17 @@ public class DsqlDataSourceConfig {
 	 * @throws SQLException
 	 */
 	public static Connection getJDBCConnection() throws SQLException {
-		Properties props = new Properties();
-		props.setProperty("user", "admin");
-		String authToken = getAuthTokenForAdminUser();
-		props.setProperty("password", authToken);
-		return DriverManager.getConnection(JDBC_URL, props);
+		long startTime = System.currentTimeMillis();
+		if (jdbConnection == null || jdbConnection.isClosed()) {
+			Properties props = new Properties();
+			props.setProperty("user", "admin");
+			String authToken = getAuthTokenForAdminUser();
+			props.setProperty("password", authToken);
+			jdbConnection = DriverManager.getConnection(JDBC_URL, props);
+		}
+		long endTime=System.currentTimeMillis();
+		System.out.println("time to create jdbc connection in ms "+(endTime-startTime)); 
+		return jdbConnection;
 	}
 
 	/**

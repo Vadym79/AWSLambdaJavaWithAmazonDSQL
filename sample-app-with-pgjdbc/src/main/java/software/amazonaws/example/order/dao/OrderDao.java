@@ -13,6 +13,8 @@ import software.amazonaws.example.order.entity.Order.Status;
 import software.amazonaws.example.order.entity.OrderItem;
 
 public class OrderDao {
+	
+	private DsqlDataSourceConfig config = new DsqlDataSourceConfig();
 
 	/**
 	 * create order and return its id
@@ -24,9 +26,9 @@ public class OrderDao {
 		int randomOrderId = (int) (Math.random() * 10000001);
 		order.setId(randomOrderId);
 		order.setStatus(Status.RECEIVED.name());
-		try (Connection con = DsqlDataSourceConfig.getPooledConnection()) {
+		try (Connection con = getConnection()) {
 			con.setAutoCommit(false);
-
+			long startTime=System.currentTimeMillis();
 			try (PreparedStatement pst = this.createOrderPreparedStatement(con, order)) {
 				pst.executeUpdate();
 
@@ -45,7 +47,10 @@ public class OrderDao {
 			} finally {
 				con.setAutoCommit(true);
 			}
+			long endTime=System.currentTimeMillis();
+			System.out.println("time to create an order in ms "+(endTime-startTime)); 
 		}
+		
 		return randomOrderId;
 	}
 	
@@ -58,7 +63,7 @@ public class OrderDao {
 	 * @return order id
 	 */
 	public int updateOrderStatusByOrderId(int id, String status) throws Exception {
-		try (Connection con = DsqlDataSourceConfig.getPooledConnection()) {
+		try (Connection con = getConnection()) {
 			try (PreparedStatement pst = this.updateOrderStatusByOrderIdPreparedStatement(con, id, status)) {
 				pst.executeUpdate();
 			}
@@ -75,7 +80,7 @@ public class OrderDao {
 	 * @throws Exception
 	 */
 	public Optional<Order> getOrderById(int id) throws Exception {
-		try (Connection con = DsqlDataSourceConfig.getPooledConnection();
+		try (Connection con = getConnection();
 				PreparedStatement pst = this.getOrderByIdPreparedStatement(con, id);
 				ResultSet rs = pst.executeQuery()) {
 			if (rs.next()) {
@@ -156,5 +161,10 @@ public class OrderDao {
 		PreparedStatement pst = con.prepareStatement("SELECT * FROM order_items WHERE order_id = ?");
 		pst.setInt(1, orderId);
 		return pst;
+	}
+	
+	private static final Connection getConnection() throws SQLException {
+		 return DsqlDataSourceConfig.getPooledConnection();
+		//return DsqlDataSourceConfig.getJDBCConnection();
 	}
 }
