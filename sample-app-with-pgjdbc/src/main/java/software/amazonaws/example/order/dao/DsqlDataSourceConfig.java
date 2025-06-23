@@ -98,7 +98,7 @@ public class DsqlDataSourceConfig {
 	 */
 	private static String getAuthTokenForAdminUser() {
 		String authToken= utilities.generateDbConnectAdminAuthToken(builder -> builder.hostname(AURORA_DSQL_CLUSTER_ENDPOINT)
-				.region(Region.of(REGION.toLowerCase())).expiresIn(Duration.ofMillis(900 * 1000))); // Token expiration, default is 900 seconds
+				.region(Region.of(REGION.toLowerCase())).expiresIn(Duration.ofMillis(90*60*1000))); // Token expiration, default is 900 seconds
 		//System.out.println("authToken : " + authToken);
 		return authToken;
 																									 
