@@ -39,7 +39,7 @@ public class DsqlDataSourceConfig {
 		config.setUsername("admin");
 		config.setJdbcUrl(JDBC_URL);
 		config.setMaxLifetime(1500 * 1000); // pool connection expiration time in milli seconds, default 30
-		config.setMaximumPoolSize(5); // default is 10
+		config.setMaximumPoolSize(1); // default is 10
 
 		String authToken = getAuthTokenForAdminUser();
 
