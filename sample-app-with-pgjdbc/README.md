@@ -29,9 +29,13 @@ Now you API Gateway has been deployed and you have some REST endpoint like get f
 
 Use this Http Body as Json to create a sample order with 2 items :
 
-{"userId":12345,"totalValue":350,
+{"userId":12345,"totalValue":350, "status":"RECEIVED",
  "orderItems":[{"productId":230, "value":100,"quantity":3},{"productId":233, "value":250,"quantity":3}]
 } 
+
+or with [hey tool](https://github.com/rakyll/hey)
+
+hey -q 1 -z 1m -c 1 -m POST -d '{"userId":12345,"totalValue":350, "status":"RECEIVED", "orderItems":[{"productId":230, "value":100,"quantity":3},{"productId":233, "value":250,"quantity":3}]}' -H "X-API-Key: a6ZbcDefQW12BN56WEDS7" -H "Content-Type: application/json;charset=utf-8"  ${API_GATEWAY_URL}/prod/orders/
 
 for update order status use specific order use orders/updatestatus/{id} and status like SHIPPED as body
 

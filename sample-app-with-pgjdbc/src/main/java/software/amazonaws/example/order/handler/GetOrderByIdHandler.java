@@ -69,6 +69,7 @@ public class GetOrderByIdHandler
 	}
 	
 
+	@SuppressWarnings("unused")
 	private void beforeCheckpointDynamoDBRequestPriming(org.crac.Context<? extends Resource> context) throws Exception {
 		orderDao.getOrderById(0);
 	}

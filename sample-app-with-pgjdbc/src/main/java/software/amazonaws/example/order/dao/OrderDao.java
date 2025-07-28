@@ -21,7 +21,7 @@ public class OrderDao {
 	 * @return order id
 	 */
 	public int createOrder(Order order) throws Exception {
-		int randomOrderId = (int) (Math.random() * 10000001);
+		int randomOrderId = (int) (Math.random() * 100000001);
 		order.setId(randomOrderId);
 		order.setStatus(Status.RECEIVED.name());
 		try (Connection con = getConnection()) {
@@ -31,7 +31,7 @@ public class OrderDao {
 				pst.executeUpdate();
 
 				for (OrderItem orderItem : order.getOrderItems()) {
-					int randomOrderItemId = (int) (Math.random() * 100000001);
+					int randomOrderItemId = (int) (Math.random() * 1000000001);
 					orderItem.setId(randomOrderItemId);
 					orderItem.setOrderId(randomOrderId);
 					try (PreparedStatement psti = this.createOrderItemPreparedStatement(con, orderItem)) {
