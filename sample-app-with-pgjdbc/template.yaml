@@ -17,8 +17,8 @@ Globals:
   Function:
     CodeUri: target/aws-lambda-java-21-with-aurora-dsql-and-pgjdbc-1.0.0-SNAPSHOT.jar
     Runtime: java21
-    SnapStart:
-      ApplyOn: PublishedVersions     
+    #SnapStart:
+      #ApplyOn: PublishedVersions     
     Timeout: 30 
     MemorySize: 1024
     Architectures:
@@ -125,6 +125,34 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${CreateOrderFunction}"
       RetentionInDays: 7
 
+  CreateOrderWithPrimingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: CreateOrderWithJava21WithPrimingLambda
+      AutoPublishAlias: liveVersion
+      Handler: software.amazonaws.example.order.handler.CreateOrderWithPrimingHandler::handleRequest
+      Policies:
+        - Version: '2012-10-17' # Policy Document
+          Statement:
+            - Effect: Allow
+              Action:
+                - dsql:DbConnectAdmin
+              Resource: !Sub arn:aws:dsql:${AWS::Region}:${AWS::AccountId}:cluster/${AuroraDSQLClusterId}
+              
+      Events:
+        GetRequestById:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyApi
+            Path: /ordersWithPriming
+            Method: post    
+
+  CreateOrderWithPrimingFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${CreateOrderWithPrimingFunction}"
+      RetentionInDays: 7
+
 
   GetOrderByIdFunction:
     Type: AWS::Serverless::Function
@@ -153,6 +181,35 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub "/aws/lambda/${GetOrderByIdFunction}"
+      RetentionInDays: 7
+
+  GetOrderByIdWithPrimingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: GetOrderByIdWithJava21WithPrimingLambda
+      AutoPublishAlias: liveVersion
+      Handler: software.amazonaws.example.order.handler.GetOrderByIdWithPrimingHandler::handleRequest
+      Policies:
+        - Version: '2012-10-17' # Policy Document
+          Statement:
+            - Effect: Allow
+              Action:
+                - dsql:DbConnectAdmin
+              Resource: !Sub arn:aws:dsql:${AWS::Region}:${AWS::AccountId}:cluster/${AuroraDSQLClusterId}
+              
+      Events:
+        GetRequestById:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyApi
+            Path: /ordersWithPriming/{id}
+            Method: get     
+
+
+  GetOrderByIdWithPrimingFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${GetOrderByIdWithPrimingFunction}"
       RetentionInDays: 7
 
 

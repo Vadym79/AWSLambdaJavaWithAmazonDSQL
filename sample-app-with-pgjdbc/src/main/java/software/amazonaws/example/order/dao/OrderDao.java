@@ -14,6 +14,9 @@ import software.amazonaws.example.order.entity.OrderItem;
 
 public class OrderDao {
 	
+	@SuppressWarnings("unused")
+	private static final DsqlDataSourceConfig dsqlDataSourceConfig=new DsqlDataSourceConfig();
+	
 	/**
 	 * create order and return its id
 	 * 
@@ -78,11 +81,13 @@ public class OrderDao {
 	 * @throws Exception
 	 */
 	public Optional<Order> getOrderById(int id) throws Exception {
+		long startTime=System.currentTimeMillis();
 		try (Connection con = getConnection();
 				PreparedStatement pst = this.getOrderByIdPreparedStatement(con, id);
 				ResultSet rs = pst.executeQuery()) {
+			long endTimeGetOrder=System.currentTimeMillis();
+			System.out.println("time to get an order by id  " +id+ " from the database in ms "+(endTimeGetOrder-startTime)); 
 			if (rs.next()) {
-				long startTime=System.currentTimeMillis();
 				int userId = rs.getInt("user_id");
 				int totalValue = rs.getInt("total_value");
 				String status = rs.getString("status");
@@ -93,9 +98,11 @@ public class OrderDao {
 				order.setStatus(status);
 
 				Set<OrderItem> orderItems = new HashSet<>();
-
+				long startTimeGetOrderItem=System.currentTimeMillis();
 				try (PreparedStatement psti = this.getOrderItemsByOrderIdPreparedStatement(con, id);
 						ResultSet rsi = psti.executeQuery()) {
+					long endTimeGetOrderItem=System.currentTimeMillis();
+					System.out.println("time to get an order item by order id  " +id+ " from the database in ms "+(endTimeGetOrderItem-startTimeGetOrderItem)); 
 					while (rsi.next()) {
 						int itemId = rsi.getInt("id");
 						int productId = rsi.getInt("product_id");

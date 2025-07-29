@@ -54,6 +54,8 @@ CREATE TABLE orders (id int PRIMARY KEY,  user_id  int NOT NULL, total_value int
 
 CREATE TABLE order_items (id int PRIMARY KEY,  product_id int NOT NULL, order_id int NOT NULL, value int NOT NULL, quantity int NOT NULL);
 
+CREATE INDEX ASYNC order_items_order_id_idx ON order_items (order_id);
+
 3) Populate some data
 
 INSERT INTO orders VALUES (1, 12345, 250, 'RECEIVED'); 
