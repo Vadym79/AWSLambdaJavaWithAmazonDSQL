@@ -31,15 +31,23 @@ public class OrderDao {
 			con.setAutoCommit(false);
 			long startTime=System.currentTimeMillis();
 			try (PreparedStatement pst = this.createOrderPreparedStatement(con, order)) {
+				long startTimeCreateOrder=System.currentTimeMillis();
 				pst.executeUpdate();
-
+				long endTimeCreateOrder=System.currentTimeMillis();
+				System.out.println("time to create order with id  " +randomOrderId+ " in the database in ms "+(endTimeCreateOrder-startTimeCreateOrder)); 
+				
 				for (OrderItem orderItem : order.getOrderItems()) {
 					int randomOrderItemId = (int) (Math.random() * 1000000001);
 					orderItem.setId(randomOrderItemId);
 					orderItem.setOrderId(randomOrderId);
 					try (PreparedStatement psti = this.createOrderItemPreparedStatement(con, orderItem)) {
+						long startTimeCreateOrderItem=System.currentTimeMillis();
 						psti.executeUpdate();
+						long endTimeCreateOrderItem=System.currentTimeMillis();
+						System.out.println("time to create order item with id  " +randomOrderItemId+ " and order id "+ randomOrderId + " in the database in ms "+(endTimeCreateOrderItem-startTimeCreateOrderItem)); 
+						
 					}
+					
 				}
 				con.commit();
 			} catch (SQLException ex) {
