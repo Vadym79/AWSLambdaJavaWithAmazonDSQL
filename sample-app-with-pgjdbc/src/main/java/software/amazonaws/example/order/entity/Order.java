@@ -1,5 +1,6 @@
 package software.amazonaws.example.order.entity;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 public class Order {
@@ -9,6 +10,7 @@ public class Order {
 	private int totalValue;
 	private Set<OrderItem> orderItems=Set.of();
 	private String status ;
+	private LocalDateTime dateTime;
 	
 	public String getStatus() {
 		return this.status;
@@ -45,14 +47,21 @@ public class Order {
 	@Override
 	public String toString() {
 		return "Order [id=" + this.id + ", userId=" + this.userId + ", totalValue=" + this.totalValue +
-				", orderItems=" + this.orderItems+ ", status=" + this.status
+				", orderItems=" + this.orderItems+ ", status=" + this.status+ ", dateTime=" + this.dateTime
 				+ "]";
 	}
+		
+	public LocalDateTime getDateTime() {
+		return this.dateTime;
+	}
+	public void setDateTime(LocalDateTime dateTime) {
+		this.dateTime = dateTime;
+	}
+
+	
 	
 	public enum Status {
 		  RECEIVED,
 		  SHIPPED
 		}
-
-	
 }

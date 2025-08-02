@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +15,7 @@ import software.amazonaws.example.order.entity.Order.Status;
 import software.amazonaws.example.order.entity.OrderItem;
 
 public class OrderDao {
+	
 	
 	@SuppressWarnings("unused")
 	private static final DsqlDataSourceConfig dsqlDataSourceConfig=new DsqlDataSourceConfig();
@@ -26,6 +29,7 @@ public class OrderDao {
 	public int createOrder(Order order) throws Exception {
 		int randomOrderId = (int) (Math.random() * 100000001);
 		order.setId(randomOrderId);
+		order.setDateTime(LocalDateTime.now());
 		order.setStatus(Status.RECEIVED.name());
 		try (Connection con = getConnection()) {
 			con.setAutoCommit(false);
@@ -99,12 +103,18 @@ public class OrderDao {
 				int userId = rs.getInt("user_id");
 				int totalValue = rs.getInt("total_value");
 				String status = rs.getString("status");
+				Timestamp createdTs=rs.getTimestamp("created");
+				LocalDateTime created=null;
+				if(createdTs != null) {
+					created=createdTs.toLocalDateTime();
+				}
 				final Order order = new Order();
 				order.setId(id);
 				order.setUserId(userId);
 				order.setTotalValue(totalValue);
 				order.setStatus(status);
-
+				order.setDateTime(created);
+				
 				Set<OrderItem> orderItems = new HashSet<>();
 				long startTimeGetOrderItem=System.currentTimeMillis();
 				try (PreparedStatement psti = this.getOrderItemsByOrderIdPreparedStatement(con, id);
@@ -135,6 +145,70 @@ public class OrderDao {
 			}
 		}
 	}
+	
+	
+	/** return orders created between start and dates
+	 * 
+	 * @param startDate
+	 * @param endDate
+	 * @return orders created between start and dates
+	 * @throws Exception
+	 */
+	public Set<Order> getOrdersByCreatedDates(LocalDateTime startDate, LocalDateTime endDate) throws Exception {
+		long startTime=System.currentTimeMillis();
+		Set<Order> orders=new HashSet<Order>();
+		try (Connection con = getConnection();
+				PreparedStatement pst = this.getOrdersByCreatedDatesPreparedStatement(con, startDate, endDate);
+				ResultSet rs = pst.executeQuery()) {
+			long endTimeGetOrder=System.currentTimeMillis();
+			while (rs.next()) {
+				int id = rs.getInt("id");
+				System.out.println("time to get an order by id  " +id+ " from the database in ms "+(endTimeGetOrder-startTime)); 
+				int userId = rs.getInt("user_id");
+				int totalValue = rs.getInt("total_value");
+				String status = rs.getString("status");
+				Timestamp createdTs=rs.getTimestamp("created");
+				LocalDateTime created=null;
+				if(createdTs != null) {
+					created=createdTs.toLocalDateTime();
+				}
+				final Order order = new Order();
+				order.setId(id);
+				order.setUserId(userId);
+				order.setTotalValue(totalValue);
+				order.setStatus(status);
+				order.setDateTime(created);
+				
+				Set<OrderItem> orderItems = new HashSet<>();
+				long startTimeGetOrderItem=System.currentTimeMillis();
+				try (PreparedStatement psti = this.getOrderItemsByOrderIdPreparedStatement(con, id);
+						ResultSet rsi = psti.executeQuery()) {
+					long endTimeGetOrderItem=System.currentTimeMillis();
+					System.out.println("time to get an order item by order id  " +id+ " from the database in ms "+(endTimeGetOrderItem-startTimeGetOrderItem)); 
+					while (rsi.next()) {
+						int itemId = rsi.getInt("id");
+						int productId = rsi.getInt("product_id");
+						int value = rsi.getInt("value");
+						int quantity = rsi.getInt("quantity");
+
+						final OrderItem orderItem = new OrderItem();
+						orderItem.setId(itemId);
+						orderItem.setProductId(productId);
+						orderItem.setOrderId(id);
+						orderItem.setQuantity(quantity);
+						orderItem.setValue(value);
+						orderItems.add(orderItem);
+					}
+				}
+				order.setOrderItems(orderItems);
+				long endTime=System.currentTimeMillis();
+				System.out.println("time to get an order by id " +id+ " in ms "+(endTime-startTime)); 
+				orders.add(order);
+			} 
+		}
+		return orders;
+	}
+
 
 	
 	
@@ -147,11 +221,16 @@ public class OrderDao {
 
 
 	private PreparedStatement createOrderPreparedStatement(Connection con, Order order) throws SQLException {
-		PreparedStatement pst = con.prepareStatement("INSERT INTO orders VALUES (?, ?, ?, ?) ");
+		PreparedStatement pst = con.prepareStatement("INSERT INTO orders VALUES (?, ?, ?, ?, ?) ");
 		pst.setInt(1, order.getId());
 		pst.setInt(2, order.getUserId());
 		pst.setInt(3, order.getTotalValue());
 		pst.setString(4, order.getStatus());
+		if(order.getDateTime() !=null) {
+		   pst.setTimestamp(5, Timestamp.valueOf(order.getDateTime()));
+		} else {
+			pst.setTimestamp(5,null);
+		}
 		return pst;
 	}
 
@@ -169,6 +248,13 @@ public class OrderDao {
 	private PreparedStatement getOrderByIdPreparedStatement(Connection con, int id) throws SQLException {
 		PreparedStatement pst = con.prepareStatement("SELECT * FROM orders WHERE id = ?");
 		pst.setInt(1, id);
+		return pst;
+	}
+	
+	private PreparedStatement getOrdersByCreatedDatesPreparedStatement(Connection con, LocalDateTime startDate,LocalDateTime endDate) throws SQLException {
+		PreparedStatement pst = con.prepareStatement("SELECT * FROM orders WHERE created BETWEEN ? and ? LIMIT 10");
+		pst.setTimestamp(1, Timestamp.valueOf(startDate));
+		pst.setTimestamp(2, Timestamp.valueOf(endDate));
 		return pst;
 	}
 

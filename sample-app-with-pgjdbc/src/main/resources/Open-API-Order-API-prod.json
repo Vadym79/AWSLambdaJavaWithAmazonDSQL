@@ -1,0 +1,90 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "AWSLambdaJava21WithDSQLAndPgJDBCAPI",
+    "description" : "Api for making CRUD operations on orders",
+    "version" : "1.0"
+  },
+  "servers" : [ {
+    "url" : "${YOUR_API_GATEWAY_URL}/prod"
+  } ],
+  "paths" : {
+    "/orders/{id}" : {
+      "get" : {
+        "summary": "Get the order by it id",
+        "description": "Returns the order by its id",
+        "operationId": "getOrderById",
+        "parameters" : [ {
+          "name" : "id",
+          "description": "order id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "404": {
+            "description": "Location not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      }
+    },
+    "/ordersByCreatedDates/{startDate}/{endDate}" : {
+      "get" : {
+        "summary": "Get the orders created between start and end date",
+        "description": "Get the orders created between start and end date",
+        "operationId": "getOrdersByCreatedDates",
+        "parameters" : [ {
+          "name" : "startDate",
+          "description": "order created after this date",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        },  
+        { "name" : "endDate",
+          "description": "order created before this date",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "404": {
+            "description": "Location not found"
+          }
+        },
+        "security" : [ {
+          "api_key" : [ ]
+        } ]
+      }
+   }
+  },
+  "components" : {
+    "securitySchemes" : {
+      "api_key" : {
+        "type" : "apiKey",
+        "name" : "x-api-key",
+        "in" : "header"
+      }
+    }
+  }
+}

@@ -1,7 +1,11 @@
 
 package software.amazonaws.example.order.handler;
 
-import java.util.Optional;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.Set;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -14,7 +18,7 @@ import software.amazon.awssdk.http.HttpStatusCode;
 import software.amazonaws.example.order.dao.OrderDao;
 import software.amazonaws.example.order.entity.Order;
 
-public class GetOrderByIdHandler
+public class GetOrdersByCreatedDates
 		implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
 	private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -37,18 +41,26 @@ public class GetOrderByIdHandler
     	 System.out.println("custom map "+context.getClientContext().getCustom());
         }
     	
-    	String id = requestEvent.getPathParameters().get("id");
-    	System.out.println("order id to retrieve "+id);
-		try {
-			Optional<Order> optionalOrder = orderDao.getOrderById(Integer.valueOf(id));
-			if (optionalOrder.isEmpty()) {
-				context.getLogger().log(" order with id " + id + " not found ");
+    	String startDate = requestEvent.getPathParameters().get("startDate");
+    	String endDate = requestEvent.getPathParameters().get("endDate");
+    	
+    	System.out.println("orderd id to retrieve between "+startDate+ " end "+endDate);
+    	
+    	try {
+    	startDate=decode(startDate);
+    	endDate=decode(endDate);
+    	System.out.println("orderd id to retrieve between decoded "+startDate+ " end "+endDate);
+		
+			// LocalDateTime.parse("2025-08-02T19:50:55");
+			Set<Order> orders = orderDao.getOrdersByCreatedDates(LocalDateTime.parse(startDate), LocalDateTime.parse(endDate));
+			if (orders.isEmpty()) {
+				context.getLogger().log(" orders are not found ");
 				return new APIGatewayProxyResponseEvent().withStatusCode(HttpStatusCode.NOT_FOUND)
-						.withBody("order with id = " + id + " not found");
+						.withBody(" orders are not found ");
 			}
-			context.getLogger().log(" order " + optionalOrder.get() + " found ");
+			context.getLogger().log(" order " + orders + " found ");
 			return new APIGatewayProxyResponseEvent().withStatusCode(HttpStatusCode.OK)
-					.withBody(objectMapper.writeValueAsString(optionalOrder.get()));
+					.withBody(objectMapper.writeValueAsString(orders));
 		} catch (Exception je) {
 			je.printStackTrace();
 			return new APIGatewayProxyResponseEvent().withStatusCode(HttpStatusCode.INTERNAL_SERVER_ERROR)
@@ -56,4 +68,7 @@ public class GetOrderByIdHandler
 		}
 	}
 
+	private static String decode(String value) throws UnsupportedEncodingException {
+	    return URLDecoder.decode(value, StandardCharsets.UTF_8.toString());
+	}
 }

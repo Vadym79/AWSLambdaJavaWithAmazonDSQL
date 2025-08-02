@@ -15,6 +15,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.amazonaws.services.lambda.runtime.serialization.events.LambdaEventSerializers;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import software.amazon.awssdk.http.HttpStatusCode;
 import software.amazonaws.example.order.dao.OrderDao;
@@ -25,7 +26,9 @@ public class GetOrderByIdWithPrimingHandler
 
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 	private static final OrderDao orderDao = new OrderDao();
-
+	static {
+		objectMapper.registerModule(new JavaTimeModule());
+	}
 	
 	public GetOrderByIdWithPrimingHandler() {
 		Core.getGlobalContext().register(this);
@@ -35,11 +38,10 @@ public class GetOrderByIdWithPrimingHandler
 	@Override
 	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
 		String id = requestEvent.getPathParameters().get("id");
-
 		try {
 			Optional<Order> optionalOrder = orderDao.getOrderById(Integer.valueOf(id));
 			if (optionalOrder.isEmpty()) {
-				context.getLogger().log(" order with id " + id + " found ");
+				context.getLogger().log(" order with id " + id + " not found ");
 				return new APIGatewayProxyResponseEvent().withStatusCode(HttpStatusCode.NOT_FOUND)
 						.withBody("order with id = " + id + " not found");
 			}

@@ -50,21 +50,22 @@ for update order status use specific order use orders/updatestatus/{id} and stat
  
 2) Execute these sql statements to create table and sequences   
 
-CREATE TABLE orders (id int PRIMARY KEY,  user_id  int NOT NULL, total_value int NOT NULL, status varchar (255) NOT NULL ); 
+CREATE TABLE orders (id int PRIMARY KEY,  user_id  int NOT NULL, total_value int NOT NULL, status varchar (255) NOT NULL, created timestamp ); 
 
 CREATE TABLE order_items (id int PRIMARY KEY,  product_id int NOT NULL, order_id int NOT NULL, value int NOT NULL, quantity int NOT NULL);
 
 CREATE INDEX ASYNC order_items_order_id_idx ON order_items (order_id);
+CREATE INDEX ASYNC order_created_idx ON orders (created);
 
 3) Populate some data
 
-INSERT INTO orders VALUES (1, 12345, 250, 'RECEIVED'); 
+INSERT INTO orders VALUES (1, 12345, 250, 'RECEIVED', now());
 
 INSERT INTO order_items VALUES (1, 79900, 1, 150, 1); 
 INSERT INTO order_items VALUES (2, 79901, 1, 100, 2); 
 
 
-INSERT INTO orders VALUES (2, 24678, 200, 'RECEIVED'); 
+INSERT INTO orders VALUES (2, 24678, 200, 'RECEIVED', now()); 
 
 INSERT INTO order_items VALUES (3, 79900, 2, 50, 1); 
 INSERT INTO order_items VALUES (4, 79902, 2, 150, 3); 

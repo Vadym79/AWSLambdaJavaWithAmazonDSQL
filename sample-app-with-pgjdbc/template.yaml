@@ -39,13 +39,13 @@ Resources:
       #TracingEnabled: true
       Name: AWSLambdaJava21WithDSQLAndPgJDBCAPI
       Description: Api for AWSLambdaJava21WithDSQLAndPgJDBC
-      #AccessLogSetting:
-        #DestinationArn: !Sub ${MyApiLogGroup.Arn} # This Log Group is already created within our SAM Template
-        #Format: "{'integrationLatency':'$context.integrationLatency', 'latency':'$context.responseLatency', 'requestId':'$context.requestId', 'ip': '$context.identity.sourceIp', 'caller':'$context.identity.caller', 'user':'$context.identity.user','requestTime':'$context.requestTime', 'xrayTraceId':'$context.xrayTraceId', 'wafResponseCode':'$context.wafResponseCode', 'httpMethod':'$context.httpMethod','resourcePath':'$context.resourcePath', 'status':'$context.status','protocol':'$context.protocol', 'responseLength':'$context.responseLength' }"
-      #MethodSettings:
-       # - MetricsEnabled: True
-       #   ResourcePath: '/*'
-       #   HttpMethod: '*'
+      AccessLogSetting:
+        DestinationArn: !Sub ${MyApiLogGroup.Arn} # This Log Group is already created within our SAM Template
+        Format: "{'integrationLatency':'$context.integrationLatency', 'latency':'$context.responseLatency', 'requestId':'$context.requestId', 'ip': '$context.identity.sourceIp', 'caller':'$context.identity.caller', 'user':'$context.identity.user','requestTime':'$context.requestTime', 'xrayTraceId':'$context.xrayTraceId', 'wafResponseCode':'$context.wafResponseCode', 'httpMethod':'$context.httpMethod','resourcePath':'$context.resourcePath', 'status':'$context.status','protocol':'$context.protocol', 'responseLength':'$context.responseLength' }"
+      MethodSettings:
+        - MetricsEnabled: True
+          ResourcePath: '/*'
+          HttpMethod: '*'
       Auth:
         ApiKeyRequired: true  # sets for all methods
   
@@ -210,6 +210,35 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub "/aws/lambda/${GetOrderByIdWithPrimingFunction}"
+      RetentionInDays: 7
+
+  GetOrdersByCreatedDatesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: GetOrdersByCreatedDatesWithJava21Lambda
+      AutoPublishAlias: liveVersion
+      Handler: software.amazonaws.example.order.handler.GetOrdersByCreatedDates::handleRequest
+      Policies:
+        - Version: '2012-10-17' # Policy Document
+          Statement:
+            - Effect: Allow
+              Action:
+                - dsql:DbConnectAdmin
+              Resource: !Sub arn:aws:dsql:${AWS::Region}:${AWS::AccountId}:cluster/${AuroraDSQLClusterId}
+              
+      Events:
+        GetRequestById:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyApi
+            Path: /ordersByCreatedDates/{startDate}/{endDate}
+            Method: get     
+            
+            
+  GetOrdersByCreatedDatesFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${GetOrdersByCreatedDatesFunction}"
       RetentionInDays: 7
 
 
