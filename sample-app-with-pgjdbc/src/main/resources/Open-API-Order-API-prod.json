@@ -6,7 +6,7 @@
     "version" : "1.0"
   },
   "servers" : [ {
-    "url" : "${YOUR_API_GATEWAY_URL}/prod"
+	"url" : "${YOUR_API_GATEWAY_URL}/prod"
   } ],
   "paths" : {
     "/orders/{id}" : {
@@ -30,8 +30,14 @@
           "400": {
             "description": "Invalid request"
           },
+          "403": {
+            "description": "Not authorised to perform this request"
+          },
           "404": {
-            "description": "Location not found"
+            "description": "Order by id is not found"
+          },
+         "500": {
+            "description": "Server error"
           }
         },
         "security" : [ {
@@ -68,11 +74,16 @@
           "400": {
             "description": "Invalid request"
           },
+          "403": {
+            "description": "Not authorised to perform this request"
+          },
           "404": {
-            "description": "Location not found"
+            "description": "Orders by created dates are not found"
+          },
+         "500": {
+            "description": "Server error"
           }
-        },
-        "security" : [ {
+        },        "security" : [ {
           "api_key" : [ ]
         } ]
       }
