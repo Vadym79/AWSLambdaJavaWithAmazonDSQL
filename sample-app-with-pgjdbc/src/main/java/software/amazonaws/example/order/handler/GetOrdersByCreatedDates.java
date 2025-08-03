@@ -44,21 +44,21 @@ public class GetOrdersByCreatedDates
     	String startDate = requestEvent.getPathParameters().get("startDate");
     	String endDate = requestEvent.getPathParameters().get("endDate");
     	
-    	System.out.println("orderd id to retrieve between "+startDate+ " end "+endDate);
+    	System.out.println("orders to retrieve between "+startDate+ " end "+endDate);
     	
     	try {
     	startDate=decode(startDate);
     	endDate=decode(endDate);
-    	System.out.println("orderd id to retrieve between decoded "+startDate+ " end "+endDate);
+    	System.out.println("orders to retrieve between decoded "+startDate+ " end "+endDate);
 		
 			// LocalDateTime.parse("2025-08-02T19:50:55");
 			Set<Order> orders = orderDao.getOrdersByCreatedDates(LocalDateTime.parse(startDate), LocalDateTime.parse(endDate));
 			if (orders.isEmpty()) {
-				context.getLogger().log(" orders are not found ");
+				context.getLogger().log("No orders found created between "+startDate+ " and "+endDate);
 				return new APIGatewayProxyResponseEvent().withStatusCode(HttpStatusCode.NOT_FOUND)
-						.withBody(" orders are not found ");
+						.withBody("No orders found created between "+startDate+ " and "+endDate);
 			}
-			context.getLogger().log(" order " + orders + " found ");
+			context.getLogger().log(" Orders " + orders + " found "+orders);
 			return new APIGatewayProxyResponseEvent().withStatusCode(HttpStatusCode.OK)
 					.withBody(objectMapper.writeValueAsString(orders));
 		} catch (Exception je) {
