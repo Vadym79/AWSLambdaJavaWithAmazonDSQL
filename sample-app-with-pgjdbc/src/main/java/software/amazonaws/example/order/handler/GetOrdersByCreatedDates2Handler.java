@@ -5,11 +5,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Set;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -18,8 +18,8 @@ import software.amazon.awssdk.http.HttpStatusCode;
 import software.amazonaws.example.order.dao.OrderDao;
 import software.amazonaws.example.order.entity.Order;
 
-public class GetOrdersByCreatedDates
-		implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class GetOrdersByCreatedDates2Handler
+		implements RequestHandler<Map<String, String>, APIGatewayProxyResponseEvent> {
 
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 	static {
@@ -29,20 +29,15 @@ public class GetOrdersByCreatedDates
 
 
 	@Override
-	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent requestEvent, Context context) {
-        
-		/*
-		System.out.println("param map "+requestEvent.getPathParameters());
-        System.out.println("query string map "+requestEvent.getQueryStringParameters());
-        System.out.println("body "+requestEvent.getBody());
-        System.out.println("path "+requestEvent.getPath());
-        */
+	public APIGatewayProxyResponseEvent handleRequest(Map<String, String> params, Context context) {
+		System.out.println("params: "+params);
+		  
         if(context.getClientContext() != null) {
     	 System.out.println("custom map "+context.getClientContext().getCustom());
         }
     	
-    	String startDate = requestEvent.getPathParameters().get("startDate");
-    	String endDate = requestEvent.getPathParameters().get("endDate");
+    	String startDate = params.get("startDate");
+    	String endDate = params.get("endDate");
     	
     	System.out.println("orders to retrieve between "+startDate+ " end "+endDate);
     	

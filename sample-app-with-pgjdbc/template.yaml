@@ -212,12 +212,36 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${GetOrderByIdWithPrimingFunction}"
       RetentionInDays: 7
 
+
+  GetOrderById2Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: GetOrderById2WithJava21Lambda
+      AutoPublishAlias: liveVersion
+      Handler: software.amazonaws.example.order.handler.GetOrderById2Handler::handleRequest
+      Policies:
+        - Version: '2012-10-17' # Policy Document
+          Statement:
+            - Effect: Allow
+              Action:
+                - dsql:DbConnectAdmin
+              Resource: !Sub arn:aws:dsql:${AWS::Region}:${AWS::AccountId}:cluster/${AuroraDSQLClusterId}
+              
+            
+            
+  GetOrderById2FunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${GetOrderById2Function}"
+      RetentionInDays: 7
+  
+
   GetOrdersByCreatedDatesFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: GetOrdersByCreatedDatesWithJava21Lambda
       AutoPublishAlias: liveVersion
-      Handler: software.amazonaws.example.order.handler.GetOrdersByCreatedDates::handleRequest
+      Handler: software.amazonaws.example.order.handler.GetOrdersByCreatedDatesHandler::handleRequest
       Policies:
         - Version: '2012-10-17' # Policy Document
           Statement:
@@ -241,7 +265,30 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${GetOrdersByCreatedDatesFunction}"
       RetentionInDays: 7
 
+  GetOrdersByCreatedDates2Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: GetOrdersByCreatedDates2WithJava21Lambda
+      AutoPublishAlias: liveVersion
+      Handler: software.amazonaws.example.order.handler.GetOrdersByCreatedDates2Handler::handleRequest
+      Policies:
+        - Version: '2012-10-17' # Policy Document
+          Statement:
+            - Effect: Allow
+              Action:
+                - dsql:DbConnectAdmin
+              Resource: !Sub arn:aws:dsql:${AWS::Region}:${AWS::AccountId}:cluster/${AuroraDSQLClusterId}
+              
+            
+            
+  GetOrdersByCreatedDates2FunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${GetOrdersByCreatedDates2Function}"
+      RetentionInDays: 7
 
+  
+  
   UpdateOrderStatusByOrderIdFunction:
     Type: AWS::Serverless::Function
     Properties:
