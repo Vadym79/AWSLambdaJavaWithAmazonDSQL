@@ -1,5 +1,7 @@
 # Example of Lambda with managed Java 21 runtime using Amazon Aurora DSQL with PgJDBC and Hikari datasource pool 
 
+For the detailed instructions, please follow my article series: [Serverless applications with Java and Aurora DSQL](https://dev.to/aws-heroes/serverless-applications-with-java-and-aurora-dsql-part-1-introduction-and-sample-application-10ip)  
+
 ## Architecture
 
 
