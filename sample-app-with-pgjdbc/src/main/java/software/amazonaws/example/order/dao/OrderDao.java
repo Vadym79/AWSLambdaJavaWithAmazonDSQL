@@ -85,13 +85,10 @@ public class OrderDao {
 	}
 
 
-	/**
-	 * returns order by its id with order items
-	 * 
-	 * @param id -order id
-	 * @return
-	 * @throws Exception
-	 */
+	private static final Connection getConnection() throws SQLException {
+		 return DsqlDataSourceConfig.getPooledConnection();
+	}
+	
 	public Optional<Order> getOrderById(int id) throws Exception {
 		long startTime=System.currentTimeMillis();
 		try (Connection con = getConnection();
@@ -264,8 +261,4 @@ public class OrderDao {
 		return pst;
 	}
 	
-	private static final Connection getConnection() throws SQLException {
-		 return DsqlDataSourceConfig.getPooledConnection();
-		//return DsqlDataSourceConfig.getJDBCConnection();
-	}
 }
