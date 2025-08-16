@@ -91,7 +91,7 @@ public class OrderDao {
 	
 	public Optional<Order> getOrderById(int id) throws Exception {
 		long startTime=System.currentTimeMillis();
-		try (Connection con = getConnection();
+		try (Connection con = DsqlDataSourceConfig.getPooledConnection();
 				PreparedStatement pst = this.getOrderByIdPreparedStatement(con, id);
 				ResultSet rs = pst.executeQuery()) {
 			long endTimeGetOrder=System.currentTimeMillis();
