@@ -14,9 +14,6 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dsql.DsqlUtilities;
 
 public class DsqlDataSourceConfig {
-	
-	private static Connection jdbConnection=null; 
-	static long startTime=System.currentTimeMillis();
 	 
 	private static final String REGION = System.getenv("REGION");
 	private static final DsqlUtilities utilities = DsqlUtilities.builder().region(Region.of(REGION.toLowerCase()))
@@ -28,12 +25,8 @@ public class DsqlDataSourceConfig {
 			+ AURORA_DSQL_CLUSTER_ENDPOINT
 			+ ":5432/postgres?sslmode=verify-full&sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory";
 
-	
 	private static HikariDataSource hds;
 	static {
-		
-		System.out.println("region : " + REGION.toLowerCase());
-		System.out.println("url : " + AURORA_DSQL_CLUSTER_ENDPOINT);
 				
 		final HikariConfig config = new HikariConfig();
 		config.setUsername("admin");
@@ -42,12 +35,8 @@ public class DsqlDataSourceConfig {
 		config.setMaximumPoolSize(1); // default is 10
 
 		String authToken = getAuthTokenForAdminUser();
-
 		config.setPassword(authToken);
 		hds = new HikariDataSource(config);
-		long endTime=System.currentTimeMillis();
-		System.out.println("time to create hikari data source in ms "+(endTime-startTime));
-		 
 	}
 	
 	
@@ -60,12 +49,9 @@ public class DsqlDataSourceConfig {
 	 */
 	public static Connection getPooledConnection() throws SQLException {
 		// Use generateDbConnectAuthToken when connecting as `admin` user
-		long startTime=System.currentTimeMillis();
 		String authToken = getAuthTokenForAdminUser();
 		hds.setPassword(authToken);
 		Connection connection= hds.getConnection();
-		long endTime=System.currentTimeMillis();
-		System.out.println("time to create hikari pooled connection in ms "+(endTime-startTime)); 
 		return connection;
 		
 	}
@@ -96,14 +82,10 @@ public class DsqlDataSourceConfig {
 	 * @return auth token
 	 */
 	public static String getAuthTokenForAdminUser() {
-		long startTimeAuthToken=System.currentTimeMillis();
 		String authToken= utilities.generateDbConnectAdminAuthToken(builder -> builder.hostname(AURORA_DSQL_CLUSTER_ENDPOINT)
 				.region(Region.of(REGION.toLowerCase()))
-				.expiresIn(Duration.ofSeconds(900))
+				.expiresIn(Duration.ofSeconds(10))
 				); // Token expiration, default is 900 seconds
-		System.out.println("authToken : " + authToken);
-		long endTimeAuthToken=System.currentTimeMillis();
-		System.out.println("time to create auth token for admin user in ms "+(endTimeAuthToken-startTimeAuthToken)); 
 		return authToken;
 																									 
 	}
