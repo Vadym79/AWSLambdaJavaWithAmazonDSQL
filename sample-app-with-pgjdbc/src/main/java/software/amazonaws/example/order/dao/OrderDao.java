@@ -90,12 +90,9 @@ public class OrderDao {
 	}
 	
 	public Optional<Order> getOrderById(int id) throws Exception {
-		long startTime=System.currentTimeMillis();
 		try (Connection con = DsqlDataSourceConfig.getPooledConnection();
 				PreparedStatement pst = this.getOrderByIdPreparedStatement(con, id);
 				ResultSet rs = pst.executeQuery()) {
-			long endTimeGetOrder=System.currentTimeMillis();
-			System.out.println("time to get an order by id  " +id+ " from the database in ms "+(endTimeGetOrder-startTime)); 
 			if (rs.next()) {
 				int userId = rs.getInt("user_id");
 				int totalValue = rs.getInt("total_value");
@@ -113,11 +110,8 @@ public class OrderDao {
 				order.setDateTime(created);
 				
 				Set<OrderItem> orderItems = new HashSet<>();
-				long startTimeGetOrderItem=System.currentTimeMillis();
 				try (PreparedStatement psti = this.getOrderItemsByOrderIdPreparedStatement(con, id);
 						ResultSet rsi = psti.executeQuery()) {
-					long endTimeGetOrderItem=System.currentTimeMillis();
-					System.out.println("time to get an order item by order id  " +id+ " from the database in ms "+(endTimeGetOrderItem-startTimeGetOrderItem)); 
 					while (rsi.next()) {
 						int itemId = rsi.getInt("id");
 						int productId = rsi.getInt("product_id");
