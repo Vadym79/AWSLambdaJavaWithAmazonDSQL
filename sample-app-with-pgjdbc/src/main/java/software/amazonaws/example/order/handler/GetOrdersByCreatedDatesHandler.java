@@ -58,7 +58,7 @@ public class GetOrdersByCreatedDatesHandler
 				return new APIGatewayProxyResponseEvent().withStatusCode(HttpStatusCode.NOT_FOUND)
 						.withBody("No orders found created between "+startDate+ " and "+endDate);
 			}
-			context.getLogger().log(" Orders " + orders + " found "+orders);
+			context.getLogger().log(" Orders size " + orders.size() + " found ");
 			return new APIGatewayProxyResponseEvent().withStatusCode(HttpStatusCode.OK)
 					.withBody(objectMapper.writeValueAsString(orders));
 		} catch (Exception je) {
