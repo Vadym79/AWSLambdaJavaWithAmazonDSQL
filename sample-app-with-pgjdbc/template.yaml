@@ -17,9 +17,9 @@ Globals:
   Function:
     CodeUri: target/aws-lambda-java-21-with-aurora-dsql-and-pgjdbc-1.0.0-SNAPSHOT.jar
     Runtime: java21
-    #SnapStart:
-      #ApplyOn: PublishedVersions     
-    Timeout: 30 
+    SnapStart:
+      ApplyOn: PublishedVersions     
+    Timeout: 900 
     MemorySize: 1024
     Architectures:
       #- arm64
