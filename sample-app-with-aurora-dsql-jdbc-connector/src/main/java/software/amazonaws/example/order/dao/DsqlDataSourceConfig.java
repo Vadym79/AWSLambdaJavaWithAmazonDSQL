@@ -9,16 +9,11 @@ import java.util.Properties;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-//import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-//import software.amazon.awssdk.regions.Region;
-//import software.amazon.awssdk.services.dsql.DsqlUtilities;
 
 public class DsqlDataSourceConfig {
 	
 	private static Connection jdbConnection=null; 
 	 
-	private static final String REGION = System.getenv("REGION");
-	
 	private static final String AURORA_DSQL_CLUSTER_ENDPOINT = System.getenv("AURORA_DSQL_CLUSTER_ENDPOINT");
 			
 	private static final String JDBC_URL = "jdbc:aws-dsql:postgresql://"
@@ -30,7 +25,6 @@ public class DsqlDataSourceConfig {
 	private static HikariDataSource hds;
 	static {
 		
-		System.out.println("region : " + REGION.toLowerCase());
 		System.out.println("url : " + AURORA_DSQL_CLUSTER_ENDPOINT);
 				
 		final HikariConfig config = new HikariConfig();
@@ -43,7 +37,7 @@ public class DsqlDataSourceConfig {
 	}
 	
 	
-
+	
 	/**
 	 * creates jdbc connection backed by Hikari data source pool
 	 * 
@@ -66,7 +60,6 @@ public class DsqlDataSourceConfig {
 		if (jdbConnection == null || jdbConnection.isClosed()) {
 			Properties props = new Properties();
 			props.setProperty("user", "admin");
-			//props.setProperty("password", authToken);
 			jdbConnection = DriverManager.getConnection(JDBC_URL, props);
 		}
 		long endTime=System.currentTimeMillis();

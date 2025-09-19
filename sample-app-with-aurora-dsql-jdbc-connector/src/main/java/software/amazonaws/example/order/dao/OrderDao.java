@@ -27,10 +27,8 @@ public class OrderDao {
 	 * @return order id
 	 */
 	public int createOrder(Order order) throws Exception {
-		//int randomOrderId = (int) (Math.random() * 100000001);
-		int startItemId=34001;
-		for(int i=17000 ; i <=  32767 ; i++) {
-		order.setId(i);
+		int randomOrderId = (int) (Math.random() * 100000001);
+		order.setId(randomOrderId);
 		order.setDateTime(LocalDateTime.now());
 		order.setStatus(Status.RECEIVED.name());
 		try (Connection con = getConnection()) {
@@ -40,18 +38,17 @@ public class OrderDao {
 				long startTimeCreateOrder=System.currentTimeMillis();
 				pst.executeUpdate();
 				long endTimeCreateOrder=System.currentTimeMillis();
-				System.out.println("time to create order with id  " +i+ " in the database in ms "+(endTimeCreateOrder-startTimeCreateOrder)); 
+				System.out.println("time to create order with id  " +randomOrderId+ " in the database in ms "+(endTimeCreateOrder-startTimeCreateOrder)); 
 				
 				for (OrderItem orderItem : order.getOrderItems()) {
-					//int randomOrderItemId = (int) (Math.random() * 1000000001);
-					orderItem.setId(startItemId);
-					orderItem.setOrderId(i);
-					startItemId++;
+					int randomOrderItemId = (int) (Math.random() * 1000000001);
+					orderItem.setId(randomOrderItemId);
+					orderItem.setOrderId(randomOrderId);
 					try (PreparedStatement psti = this.createOrderItemPreparedStatement(con, orderItem)) {
 						long startTimeCreateOrderItem=System.currentTimeMillis();
 						psti.executeUpdate();
 						long endTimeCreateOrderItem=System.currentTimeMillis();
-						System.out.println("time to create order item with id  " +startItemId+ " and order id "+ i + " in the database in ms "+(endTimeCreateOrderItem-startTimeCreateOrderItem)); 
+						System.out.println("time to create order item with id  " +randomOrderItemId+ " and order id "+ randomOrderId + " in the database in ms "+(endTimeCreateOrderItem-startTimeCreateOrderItem)); 
 						
 					}
 					
@@ -67,8 +64,7 @@ public class OrderDao {
 			System.out.println("time to create an order in ms "+(endTime-startTime)); 
 		}
 		
-		}
-		return 0;
+		return randomOrderId;
 	}
 	
 	
@@ -159,16 +155,15 @@ public class OrderDao {
 	 * @throws Exception
 	 */
 	public Set<Order> getOrdersByCreatedDates(LocalDateTime startDate, LocalDateTime endDate) throws Exception {
-		
+		long startTime=System.currentTimeMillis();
 		Set<Order> orders=new HashSet<Order>();
 		try (Connection con = getConnection();
 				PreparedStatement pst = this.getOrdersByCreatedDatesPreparedStatement(con, startDate, endDate);
 				ResultSet rs = pst.executeQuery()) {
-			//long endTimeGetOrder=System.currentTimeMillis();
+			long endTimeGetOrder=System.currentTimeMillis();
 			while (rs.next()) {
-				//long startTime=System.currentTimeMillis();
 				int id = rs.getInt("id");
-				//System.out.println("time to get an order by id  " +id+ " from the database in ms "+(endTimeGetOrder-startTime)); 
+				System.out.println("time to get an order by id  " +id+ " from the database in ms "+(endTimeGetOrder-startTime)); 
 				int userId = rs.getInt("user_id");
 				int totalValue = rs.getInt("total_value");
 				String status = rs.getString("status");
@@ -185,21 +180,11 @@ public class OrderDao {
 				order.setDateTime(created);
 				
 				Set<OrderItem> orderItems = new HashSet<>();
-				
-				/*
-				try (PreparedStatement psti = this.selectSessionID(con);
-						ResultSet rsi = psti.executeQuery()) {
-					if (rsi.next()) {
-						String sessionID=rsi.getString(1);
-						System.out.println("sessionID "+sessionID);
-				   }
-				}
-				*/
-				//long startTimeGetOrderItem=System.currentTimeMillis();
+				long startTimeGetOrderItem=System.currentTimeMillis();
 				try (PreparedStatement psti = this.getOrderItemsByOrderIdPreparedStatement(con, id);
 						ResultSet rsi = psti.executeQuery()) {
-					//long endTimeGetOrderItem=System.currentTimeMillis();
-					//System.out.println("time to get an order item by order id  " +id+ " from the database in ms "+(endTimeGetOrderItem-startTimeGetOrderItem)); 
+					long endTimeGetOrderItem=System.currentTimeMillis();
+					System.out.println("time to get an order item by order id  " +id+ " from the database in ms "+(endTimeGetOrderItem-startTimeGetOrderItem)); 
 					while (rsi.next()) {
 						int itemId = rsi.getInt("id");
 						int productId = rsi.getInt("product_id");
@@ -216,13 +201,14 @@ public class OrderDao {
 					}
 				}
 				order.setOrderItems(orderItems);
-				//long endTime=System.currentTimeMillis();
-				//System.out.println("time to get an order by id " +id+ " in ms "+(endTime-startTime)); 
+				long endTime=System.currentTimeMillis();
+				System.out.println("time to get an order by id " +id+ " in ms "+(endTime-startTime)); 
 				orders.add(order);
 			} 
 		}
 		return orders;
 	}
+
 
 	
 	
@@ -230,14 +216,6 @@ public class OrderDao {
 		PreparedStatement pst = con.prepareStatement("UPDATE orders SET status=? WHERE id=?");
 		pst.setString(1, status);
 		pst.setInt(2, id);
-		return pst;
-	}
-
-	
-	
-	
-	private PreparedStatement selectSessionID(Connection con) throws SQLException {
-		PreparedStatement pst = con.prepareStatement("SELECT sys.current_session_id();");
 		return pst;
 	}
 
